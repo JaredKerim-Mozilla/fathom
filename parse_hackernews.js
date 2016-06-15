@@ -21,25 +21,30 @@ const metadataRules = {
 }
 
 
-function getUrlMetadata(url, resolve) {
-  console.log('entering promise');
-  jsdom.env({
-    url: url,
-    done: function (err, window) {
-      console.log('processing');
-      if (!window) {
-        return
+function getUrlMetadata(url) {
+  const result = new Promise((resolve, reject) => {
+    console.log('entering promise');
+    jsdom.env({
+      url: url,
+      done: function (err, window) {
+        console.log('processing');
+        if (!window) {
+          return
+        }
+        const articleDocument = window.document;
+        const titleKB = titleRules.score(articleDocument);
+        const titleNode = titleKB.max('title');
+        if (titleNode) {
+          console.log(titleNode.flavors.get('title'));
+          resolve(titleNode.flavors.get('title'));
+        } else {
+          reject();
+        }
+        console.log('---------')
       }
-      const articleDocument = window.document;
-      const titleKB = titleRules.score(articleDocument);
-      const titleNode = titleKB.max('title');
-      if (titleNode) {
-        console.log(titleNode.flavors.get('title'));
-        resolve(titleNode.flavors.get('title'));
-      }
-      console.log('---------')
-    }
+    });
   });
+  return result;
 }
 
 
@@ -52,9 +57,10 @@ jsdom.env({
     console.log('HN Links');
     const links = Array.from(document.querySelectorAll('a.storylink')).map((link) => {
       const articleUrl = link.getAttribute('href');
-      getUrlMetadata(articleUrl, (title) => {
+      getUrlMetadata(articleUrl).then((title) => {
         console.log(title);
       });
+
     });;
   }
 });
