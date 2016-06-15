@@ -5,7 +5,7 @@ const {dom, rule, ruleset} = require('./index');
 
 function buildRuleset(name, rules) {
   const reversedRules = Array.from(rules).reverse();
-  return ruleset(...reversedRules.map(([query, handler], order) => rule(
+  const builtRuleset = ruleset(...reversedRules.map(([query, handler], order) => rule(
     dom(query),
     node => [{
       score: order,
@@ -13,6 +13,14 @@ function buildRuleset(name, rules) {
       notes: handler(node)
     }]
   )));
+
+  return (document) => {
+    const kb = builtRuleset.score(document);
+    const maxNode = kb.max(name);
+    if (maxNode) {
+      return maxNode.flavors.get(name).trim();
+    }
+  }
 }
 
 
@@ -24,45 +32,15 @@ const titleRules = buildRuleset('title', [
 ]);
 
 
-//const titleRules = ruleset(
-//  rule(dom('meta[property="og:title"]'),
-//     node => [{score: 40, flavor: 'title', notes: node.element.content}]),
-//  rule(dom('meta[property="twitter:title"]'),
-//     node => [{score: 30, flavor: 'title', notes: node.element.content}]),
-//  rule(dom('meta[name="hdl"]'),
-//     node => [{score: 20, flavor: 'title', notes: node.element.content}]),
-//  rule(dom('title'),
-//     node => [{score: 10, flavor: 'title', notes: node.element.text}])
-//);
-////const titleKB = titleRules.score(doc);
-////const titleNode = kb.max('title');
-//
-//
-//const metadataRules = {
-//  title: titleRules,
-//}
-//
-//
 function getUrlMetadata(url) {
   const result = new Promise((resolve, reject) => {
-    console.log('entering promise');
     jsdom.env({
       url: url,
       done: function (err, window) {
-        console.log('processing');
         if (!window) {
           return
         }
-        const articleDocument = window.document;
-        const titleKB = titleRules.score(articleDocument);
-        const titleNode = titleKB.max('title');
-        if (titleNode) {
-          console.log(titleNode.flavors.get('title'));
-          resolve(titleNode.flavors.get('title'));
-        } else {
-          reject();
-        }
-        console.log('---------')
+        resolve(titleRules(window.document));
       }
     });
   });
