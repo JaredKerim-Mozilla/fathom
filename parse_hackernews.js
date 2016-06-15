@@ -18,7 +18,10 @@ function buildRuleset(name, rules) {
     const kb = builtRuleset.score(document);
     const maxNode = kb.max(name);
     if (maxNode) {
-      return maxNode.flavors.get(name).trim();
+      const value = maxNode.flavors.get(name);
+      if (value) {
+        return value.trim();
+      }
     }
   }
 }
@@ -31,6 +34,16 @@ const titleRules = buildRuleset('title', [
   ['title', (node) => node.element.text],
 ]);
 
+const canonicalUrlRules = buildRuleset('url', [
+  ['meta[property="og:url"]', (node) => node.element.content],
+  ['link[rel="canonical"]', (node) => node.element.href],
+]);
+
+const metadataRules = {
+  title: titleRules,
+  url: canonicalUrlRules
+};
+
 
 function getUrlMetadata(url) {
   const result = new Promise((resolve, reject) => {
@@ -40,7 +53,10 @@ function getUrlMetadata(url) {
         if (!window) {
           return
         }
-        resolve(titleRules(window.document));
+        resolve(Object.keys(metadataRules).map((metadataKey) => {
+          const metadataRule = metadataRules[metadataKey];
+          return [metadataKey, metadataRule(window.document)];
+        }));
       }
     });
   });
@@ -58,7 +74,10 @@ jsdom.env({
     const links = Array.from(document.querySelectorAll('a.storylink')).map((link) => {
       const articleUrl = link.getAttribute('href');
       getUrlMetadata(articleUrl).then((title) => {
+        console.log('-------------');
+        console.log(articleUrl);
         console.log(title);
+        console.log('-------------');
       });
 
     });;
