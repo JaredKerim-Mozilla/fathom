@@ -39,14 +39,26 @@ const canonicalUrlRules = buildRuleset('url', [
   ['link[rel="canonical"]', (node) => node.element.href],
 ]);
 
+
+const iconRules = buildRuleset('icon', [
+  ['link[rel="apple-touch-icon"]', (node) => node.element.href],
+  ['link[rel="apple-touch-icon-precomposed"]', (node) => node.element.href],
+  ['link[rel="icon"]', (node) => node.element.href],
+  ['link[rel="fluid-icon"]', (node) => node.element.href],
+  ['link[rel="shortcut icon"]', (node) => node.element.href],
+  ['link[rel="mask-icon"]', (node) => node.element.href],
+]);
+
+
 const metadataRules = {
+  url: canonicalUrlRules,
   title: titleRules,
-  url: canonicalUrlRules
+  icon: iconRules,
 };
 
 
 function getUrlMetadata(url) {
-  const result = new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     jsdom.env({
       url: url,
       done: function (err, window) {
@@ -60,7 +72,6 @@ function getUrlMetadata(url) {
       }
     });
   });
-  return result;
 }
 
 
