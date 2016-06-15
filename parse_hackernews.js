@@ -2,25 +2,47 @@ const jsdom = require('jsdom');
 
 const {dom, rule, ruleset} = require('./index');
 
-const titleRules = ruleset(
-    rule(dom('meta[property="og:title"]'),
-         node => [{score: 40, flavor: 'title', notes: node.element.content}]),
-    rule(dom('meta[property="twitter:title"]'),
-         node => [{score: 30, flavor: 'title', notes: node.element.content}]),
-    rule(dom('meta[name="hdl"]'),
-         node => [{score: 20, flavor: 'title', notes: node.element.content}]),
-    rule(dom('title'),
-         node => [{score: 10, flavor: 'title', notes: node.element.text}])
-);
-//const titleKB = titleRules.score(doc);
-//const titleNode = kb.max('title');
 
-
-const metadataRules = {
-  title: titleRules,
+function buildRuleset(name, rules) {
+  const reversedRules = Array.from(rules).reverse();
+  return ruleset(...reversedRules.map(([query, handler], order) => rule(
+    dom(query),
+    node => [{
+      score: order,
+      flavor: name,
+      notes: handler(node)
+    }]
+  )));
 }
 
 
+const titleRules = buildRuleset('title', [
+  ['meta[property="og:title"]', (node) => node.element.content],
+  ['meta[property="twitter:title"]', (node) => node.element.content],
+  ['meta[name="hdl"]', (node) => node.element.content],
+  ['title', (node) => node.element.text],
+]);
+
+
+//const titleRules = ruleset(
+//  rule(dom('meta[property="og:title"]'),
+//     node => [{score: 40, flavor: 'title', notes: node.element.content}]),
+//  rule(dom('meta[property="twitter:title"]'),
+//     node => [{score: 30, flavor: 'title', notes: node.element.content}]),
+//  rule(dom('meta[name="hdl"]'),
+//     node => [{score: 20, flavor: 'title', notes: node.element.content}]),
+//  rule(dom('title'),
+//     node => [{score: 10, flavor: 'title', notes: node.element.text}])
+//);
+////const titleKB = titleRules.score(doc);
+////const titleNode = kb.max('title');
+//
+//
+//const metadataRules = {
+//  title: titleRules,
+//}
+//
+//
 function getUrlMetadata(url) {
   const result = new Promise((resolve, reject) => {
     console.log('entering promise');
