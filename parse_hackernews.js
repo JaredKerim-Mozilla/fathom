@@ -3,6 +3,13 @@ const jsdom = require('jsdom');
 const {dom, rule, ruleset} = require('./index');
 
 
+function buildObj(pairs) {
+  return pairs.reduce((newObj, [key, value]) => {
+    newObj[key] = value;
+    return newObj;
+  }, {});
+}
+
 function buildRuleset(name, rules) {
   const reversedRules = Array.from(rules).reverse();
   const builtRuleset = ruleset(...reversedRules.map(([query, handler], order) => rule(
@@ -65,10 +72,10 @@ function getUrlMetadata(url) {
         if (!window) {
           return
         }
-        resolve(Object.keys(metadataRules).map((metadataKey) => {
+        resolve(buildObj(Object.keys(metadataRules).map((metadataKey) => {
           const metadataRule = metadataRules[metadataKey];
           return [metadataKey, metadataRule(window.document)];
-        }));
+        })));
       }
     });
   });
