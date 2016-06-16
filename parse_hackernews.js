@@ -1,5 +1,6 @@
 const jsdom = require('jsdom');
 const getUrlColor = require('./image');
+const urlparse = require('url');
 
 const {dom, rule, ruleset} = require('./index');
 
@@ -54,6 +55,7 @@ const iconRules = buildRuleset('icon', [
   ['link[rel="icon"]', (node) => node.element.href],
   ['link[rel="fluid-icon"]', (node) => node.element.href],
   ['link[rel="shortcut icon"]', (node) => node.element.href],
+  ['link[rel="Shortcut Icon"]', (node) => node.element.href],
   ['link[rel="mask-icon"]', (node) => node.element.href],
 ]);
 
@@ -73,6 +75,7 @@ function getUrlMetadata(url) {
         if (!window) {
           return
         }
+
         const metadata = buildObj(Object.keys(metadataRules).map((metadataKey) => {
           const metadataRule = metadataRules[metadataKey];
           return [metadataKey, metadataRule(window.document)];
@@ -80,14 +83,15 @@ function getUrlMetadata(url) {
 
         metadata.iconColor = null;
 
-        if (metadata.icon) {
-          getUrlColor(metadata.icon).then((color) => {
-            metadata.iconColor = color;
-            resolve(metadata);
-          });
-        } else {
-          resolve(metadata);
+        if (!metadata.icon) {
+          const parsedUrl = urlparse.parse(url);
+          metadata.icon = parsedUrl.protocol + '//' + parsedUrl.host + '/favicon.ico';
         }
+
+        getUrlColor(metadata.icon).then((color) => {
+          metadata.iconColor = color;
+          resolve(metadata);
+        });
       }
     });
   });
