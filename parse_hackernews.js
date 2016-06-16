@@ -92,7 +92,7 @@ function getUrlMetadata(url) {
       url: url,
       done: function (err, window) {
         if (!window) {
-          return
+          reject(err);
         }
 
         const metadata = buildObj(Object.keys(metadataRules).map((metadataKey) => {
@@ -100,9 +100,9 @@ function getUrlMetadata(url) {
           return [metadataKey, metadataRule(window.document)];
         }));
 
-        if (!metadata.url) {
-          metadata.url = url;
-        }
+        metadata.url = url;
+        metadata.original_url = url;
+        metadata.provider_url = url;
 
         if (!metadata.favicon_url) {
           const parsedUrl = urlparse.parse(url);
@@ -123,8 +123,6 @@ function getUrlMetadata(url) {
               weight: 0.0,
             }],
           }];
-          metadata.original_url = metadata.url;
-          metadata.provider_url = metadata.url;
           resolve(metadata);
         });
       }
@@ -169,7 +167,10 @@ app.post('/', function (req, res) {
     console.log('received data ' + JSON.stringify(urlsData));
     res.format({
       'application/json': () => {
-        res.send(JSON.stringify(urlsData));
+        res.send(JSON.stringify({
+          error: '',
+          urls: buildObj(urlsData.map((urlData) => [urlData.url, urlData]))
+        }));
       }
     });
   });

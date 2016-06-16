@@ -28,12 +28,14 @@ function getUrlColors(url) {
               resolve(color);
             });
           } catch (err) {
+            reject(err);
           }
         } else {
           try {
             const color = colorThief.getColor(body);
             resolve(color);
           } catch(err) {
+            reject(err);
           }
         }
 
