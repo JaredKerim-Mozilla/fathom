@@ -104,12 +104,12 @@ function getUrlMetadata(url) {
           metadata.url = url;
         }
 
-        if (!metadata.icon) {
+        if (!metadata.favicon_url) {
           const parsedUrl = urlparse.parse(url);
-          metadata.icon = parsedUrl.protocol + '//' + parsedUrl.host + '/favicon.ico';
+          metadata.favicon_url = parsedUrl.protocol + '//' + parsedUrl.host + '/favicon.ico';
         }
 
-        const iconColorPromise = getUrlColor(metadata.icon);
+        const iconColorPromise = getUrlColor(metadata.favicon_url);
         const imageColorPromise = getUrlColor(metadata.image);
         Promise.all([iconColorPromise, imageColorPromise]).then(([iconColor, imageColor]) => {
           metadata.favicon_colors = [{

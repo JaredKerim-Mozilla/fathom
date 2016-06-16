@@ -18,9 +18,6 @@ function toBuffer(ab) {
 function getUrlColors(url) {
   return new Promise((resolve, reject) => {
     request.get({ url: url, encoding: null }, function(err, res, body) {
-        if (err) throw err;
-
-
         if (url.substr(url.length - 4) === '.ico') {
           const buffer = new Uint8Array(body).buffer;
 
