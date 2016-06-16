@@ -71,8 +71,13 @@ const descriptionRules = buildRuleset('description', [
   ['meta[property="og:description"]', (node) => node.element.content],
 ]);
 
+const typeRules = buildRuleset('type', [
+  ['meta[property="og:type"]', (node) => node.element.content],
+]);
+
 
 const metadataRules = {
+  type: typeRules,
   url: canonicalUrlRules,
   title: titleRules,
   description: descriptionRules,
