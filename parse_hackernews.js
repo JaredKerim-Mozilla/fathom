@@ -133,22 +133,39 @@ function getUrlMetadata(url) {
 }
 
 
-jsdom.env({
-  url: 'http://news.ycombinator.com/',
-  done: function (err, window) {
-    const document = window.document;
+//jsdom.env({
+//  url: 'http://news.ycombinator.com/',
+//  done: function (err, window) {
+//    const document = window.document;
+//
+//
+//    console.log('HN Links');
+//    const links = Array.from(document.querySelectorAll('a.storylink')).map((link) => {
+//      const articleUrl = link.getAttribute('href');
+//      getUrlMetadata(articleUrl).then((title) => {
+//        console.log('-------------');
+//        console.log(articleUrl);
+//        console.log(title);
+//        console.log('-------------');
+//      });
+//
+//    });;
+//  }
+//});
 
+var express = require('express');
+var app = express();
 
-    console.log('HN Links');
-    const links = Array.from(document.querySelectorAll('a.storylink')).map((link) => {
-      const articleUrl = link.getAttribute('href');
-      getUrlMetadata(articleUrl).then((title) => {
-        console.log('-------------');
-        console.log(articleUrl);
-        console.log(title);
-        console.log('-------------');
-      });
+app.get('/', function (req, res) {
+  getUrlMetadata(req.query.url).then((metadata) => {
+    res.format({
+      'application/json': () => {
+        res.send(JSON.stringify(metadata));
+      }
+    });
+  });
+});
 
-    });;
-  }
+app.listen(7001, function () {
+  console.log('Example app listening on port 3000!');
 });
