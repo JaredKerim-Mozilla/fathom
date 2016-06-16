@@ -59,10 +59,16 @@ const iconRules = buildRuleset('icon', [
   ['link[rel="mask-icon"]', (node) => node.element.href],
 ]);
 
+const descriptionRules = buildRuleset('description', [
+  ['meta[name="description"]', (node) => node.element.content],
+  ['meta[property="og:description"]', (node) => node.element.content],
+]);
+
 
 const metadataRules = {
   url: canonicalUrlRules,
   title: titleRules,
+  description: descriptionRules,
   icon: iconRules,
 };
 
