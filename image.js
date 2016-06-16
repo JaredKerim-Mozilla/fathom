@@ -33,8 +33,11 @@ function getUrlColors(url) {
           } catch (err) {
           }
         } else {
-          const color = colorThief.getColor(body);
-          resolve(color);
+          try {
+            const color = colorThief.getColor(body);
+            resolve(color);
+          } catch(err) {
+          }
         }
 
     });

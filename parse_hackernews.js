@@ -59,6 +59,13 @@ const iconRules = buildRuleset('icon', [
   ['link[rel="mask-icon"]', (node) => node.element.href],
 ]);
 
+const imageRules = buildRuleset('image', [
+  ['meta[property="og:image"]', (node) => node.element.content],
+  ['meta[property="twitter:image"]', (node) => node.element.content],
+  ['meta[name="thumbnail"]', (node) => node.element.content],
+  ['img', (node) => node.element.src],
+]);
+
 const descriptionRules = buildRuleset('description', [
   ['meta[name="description"]', (node) => node.element.content],
   ['meta[property="og:description"]', (node) => node.element.content],
@@ -70,6 +77,7 @@ const metadataRules = {
   title: titleRules,
   description: descriptionRules,
   icon: iconRules,
+  image: imageRules,
 };
 
 
@@ -98,8 +106,11 @@ function getUrlMetadata(url) {
           metadata.icon = parsedUrl.protocol + '//' + parsedUrl.host + '/favicon.ico';
         }
 
-        getUrlColor(metadata.icon).then((color) => {
-          metadata.iconColor = color;
+        const iconColorPromise = getUrlColor(metadata.icon);
+        const imageColorPromise = getUrlColor(metadata.image);
+        Promise.all([iconColorPromise, imageColorPromise]).then(([iconColor, imageColor]) => {
+          metadata.iconColor = iconColor;
+          metadata.imageColor = imageColor;
           resolve(metadata);
         });
       }
