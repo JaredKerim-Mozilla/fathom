@@ -81,7 +81,7 @@ const metadataRules = {
   url: canonicalUrlRules,
   title: titleRules,
   description: descriptionRules,
-  icon: iconRules,
+  favicon_url: iconRules,
   image: imageRules,
 };
 
@@ -100,8 +100,6 @@ function getUrlMetadata(url) {
           return [metadataKey, metadataRule(window.document)];
         }));
 
-        metadata.iconColor = null;
-
         if (!metadata.url) {
           metadata.url = url;
         }
@@ -114,8 +112,19 @@ function getUrlMetadata(url) {
         const iconColorPromise = getUrlColor(metadata.icon);
         const imageColorPromise = getUrlColor(metadata.image);
         Promise.all([iconColorPromise, imageColorPromise]).then(([iconColor, imageColor]) => {
-          metadata.iconColor = iconColor;
-          metadata.imageColor = imageColor;
+          metadata.favicon_colors = [{
+            color: iconColor,
+            weight: 0.0,
+          }];
+          metadata.images = [{
+            url: metadata.image,
+            colors: [{
+              color: imageColor,
+              weight: 0.0,
+            }],
+          }];
+          metadata.original_url = metadata.url;
+          metadata.provider_url = metadata.url;
           resolve(metadata);
         });
       }
