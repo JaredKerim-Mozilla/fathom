@@ -83,6 +83,10 @@ function getUrlMetadata(url) {
 
         metadata.iconColor = null;
 
+        if (!metadata.url) {
+          metadata.url = url;
+        }
+
         if (!metadata.icon) {
           const parsedUrl = urlparse.parse(url);
           metadata.icon = parsedUrl.protocol + '//' + parsedUrl.host + '/favicon.ico';
