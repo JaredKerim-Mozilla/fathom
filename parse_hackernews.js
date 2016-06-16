@@ -154,13 +154,22 @@ function getUrlMetadata(url) {
 //});
 
 var express = require('express');
-var app = express();
+var bodyParser = require('body-parser');
 
-app.get('/', function (req, res) {
-  getUrlMetadata(req.query.url).then((metadata) => {
+var app = express();
+app.use(bodyParser.json()); // for parsing application/json
+
+app.post('/', function (req, res) {
+  const promises = req.body.urls.map((url) => {
+    console.log('requesting ' + url);
+    return getUrlMetadata(url);
+  });
+  console.log('promises ' + promises);
+  Promise.all(promises).then((urlsData) => {
+    console.log('received data ' + JSON.stringify(urlsData));
     res.format({
       'application/json': () => {
-        res.send(JSON.stringify(metadata));
+        res.send(JSON.stringify(urlsData));
       }
     });
   });
