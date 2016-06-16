@@ -1,4 +1,5 @@
 const jsdom = require('jsdom');
+const getUrlColor = require('./image');
 
 const {dom, rule, ruleset} = require('./index');
 
@@ -72,10 +73,21 @@ function getUrlMetadata(url) {
         if (!window) {
           return
         }
-        resolve(buildObj(Object.keys(metadataRules).map((metadataKey) => {
+        const metadata = buildObj(Object.keys(metadataRules).map((metadataKey) => {
           const metadataRule = metadataRules[metadataKey];
           return [metadataKey, metadataRule(window.document)];
-        })));
+        }));
+
+        metadata.iconColor = null;
+
+        if (metadata.icon) {
+          getUrlColor(metadata.icon).then((color) => {
+            metadata.iconColor = color;
+            resolve(metadata);
+          });
+        } else {
+          resolve(metadata);
+        }
       }
     });
   });
