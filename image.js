@@ -16,29 +16,45 @@ function toBuffer(ab) {
 
 
 function getUrlColors(url) {
+  console.log('getting colors for ' + url);
   return new Promise((resolve, reject) => {
+    console.log('requesting content for ' + url);
     request.get({ url: url, encoding: null }, function(err, res, body) {
-        if (url.substr(url.length - 4) === '.ico') {
-          const buffer = new Uint8Array(body).buffer;
+      if (err) {
+        reject(err);
+      }
 
-          try {
-            ICO.parse(buffer).then(images => {
-              const imageBuffer = toBuffer(images[0].buffer);
-              const color = colorThief.getColor(imageBuffer);
-              resolve(color);
-            });
-          } catch (err) {
-            reject(err);
-          }
-        } else {
-          try {
-            const color = colorThief.getColor(body);
+      console.log('received binary color data for ' + url);
+      if (url.substr(url.length - 4) === '.ico') {
+        console.log('creating buffer');
+        const buffer = new Uint8Array(body).buffer;
+        console.log('buffer created');
+
+        try {
+          console.log('begging ico parse');
+          ICO.parse(buffer).then(images => {
+            console.log('ico parsed');
+            const imageBuffer = toBuffer(images[0].buffer);
+            const color = colorThief.getColor(imageBuffer);
+            console.log('received ico color data for ' + url);
             resolve(color);
-          } catch(err) {
-            reject(err);
-          }
+          });
+        } catch (err) {
+          console.log('rejecting ico ' + err);
+          reject(err);
         }
-
+      } else {
+        try {
+          console.log('getting png color data for ' + url);
+          const color = colorThief.getColor(body);
+          console.log('received png color data for ' + url);
+          resolve(color);
+        } catch(err) {
+          console.log('rejecting png ' + err);
+          reject(err);
+        }
+      }
+      resolve([0, 0, 0]);
     });
   });
 }

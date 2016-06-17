@@ -87,15 +87,19 @@ const metadataRules = {
 
 
 function getUrlMetadata(url) {
+  console.log('getting metadata for ' + url);
   return new Promise((resolve, reject) => {
+    console.log('entering promise for ' + url);
     jsdom.env({
       url: url,
       done: function (err, window) {
+        console.log('created dom for ' + url);
         if (!window) {
           reject(err);
         }
 
         const metadata = buildObj(Object.keys(metadataRules).map((metadataKey) => {
+          console.log('applying rules for ' + url);
           const metadataRule = metadataRules[metadataKey];
           return [metadataKey, metadataRule(window.document)];
         }));
@@ -109,20 +113,36 @@ function getUrlMetadata(url) {
           metadata.favicon_url = parsedUrl.protocol + '//' + parsedUrl.host + '/favicon.ico';
         }
 
-        const iconColorPromise = getUrlColor(metadata.favicon_url);
-        const imageColorPromise = getUrlColor(metadata.image);
-        Promise.all([iconColorPromise, imageColorPromise]).then(([iconColor, imageColor]) => {
-          metadata.favicon_colors = [{
-            color: iconColor,
-            weight: 0.0,
-          }];
-          metadata.images = [{
-            url: metadata.image,
-            colors: [{
-              color: imageColor,
+        let colorPromises = [];
+
+        if(metadata.favicon_url) {
+          colorPromises.push(getUrlColor(metadata.favicon_url));
+        }
+
+        if(metadata.image) {
+          colorPromises.push(getUrlColor(metadata.image));
+        }
+
+        Promise.all(colorPromises).then(([iconColor, imageColor]) => {
+          console.log('received colors for ' + url);
+
+          if (iconColor) {
+            metadata.favicon_colors = [{
+              color: iconColor,
               weight: 0.0,
-            }],
-          }];
+            }];
+          }
+
+          if (imageColor) {
+            metadata.images = [{
+              url: metadata.image,
+              colors: [{
+                color: imageColor,
+                weight: 0.0,
+              }],
+            }];
+          }
+          console.log('emitting metadata from promise for ' + url);
           resolve(metadata);
         });
       }
