@@ -1,5 +1,6 @@
 const ColorThief = require('color-thief');
 const request = require('request');
+const urlparse = require('url');
 
 const exec = require('child_process').exec;
 const md5 = require('md5');
@@ -51,13 +52,28 @@ function getUrlColors(url) {
       }
 
       if (url.substr(url.length - 4) === '.ico') {
+        const iconFilename = path.basename(urlparse.parse(url).path);
+
+        console.log('found ico ' + iconFilename);
+
         temp.track();
         temp.mkdir(md5(url), function(err, dirPath) {
-          const cmd = 'cd ' + dirPath + ';wget ' + url + ';icotool -x -o . favicon.ico;ls -I favicon.ico | head -n 1';
+          const cmd = 'cd ' + dirPath + ';wget ' + url + ';icotool -x -o . ' + iconFilename + ';ls -I ' + iconFilename + ' | head -n 1';
+          console.log('executing command ' + cmd);
 
           exec(cmd, function(error, stdout, stderr) {
             // command output is in stdout
-            const color = colorThief.getColor(path.join(dirPath, stdout.trim()));
+            const imageFilename = stdout.trim();
+
+            if (!imageFilename) {
+              console.log('unpacked zero icons!');
+              resolve([0, 0, 0]);
+              return;
+            }
+
+            const iconPath = path.join(dirPath, imageFilename);
+            console.log('reading unpacked image ' + iconPath);
+            const color = colorThief.getColor(iconPath);
             console.log('found ico color ' + color);
             resolve(color);
             return;
