@@ -114,7 +114,7 @@ function getUrlMetadata(url) {
           metadata.favicon_url = parsedUrl.protocol + '//' + parsedUrl.host + '/favicon.ico';
         }
 
-        metadata.image = metadata.image.replace(/^\/\//, 'https://');
+        metadata.image = metadata.image && metadata.image.replace(/^\/\//, 'https://');
 
         let colorPromises = [];
 
