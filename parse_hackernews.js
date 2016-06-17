@@ -95,7 +95,8 @@ function getUrlMetadata(url) {
       done: function (err, window) {
         console.log('created dom for ' + url);
         if (!window) {
-          reject(err);
+          resolve({});
+          return;
         }
 
         const metadata = buildObj(Object.keys(metadataRules).map((metadataKey) => {
@@ -144,7 +145,7 @@ function getUrlMetadata(url) {
           }
           console.log('emitting metadata from promise for ' + url);
           resolve(metadata);
-        });
+        }, (err) => resolve(metadata));
       }
     });
   });

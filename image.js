@@ -47,6 +47,8 @@ function getUrlColors(url) {
       }
 
       if (url.substr(url.length - 4) === '.ico') {
+        resolve([0, 0, 0]);
+        return;
         console.log('creating buffer');
         const buffer = new Uint8Array(body).buffer;
         console.log('buffer created');
@@ -66,6 +68,9 @@ function getUrlColors(url) {
         }
         return;
       }
+
+      resolve([0, 0, 0]);
+      return;
     });
   });
 }
