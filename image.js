@@ -1,6 +1,10 @@
 const ColorThief = require('color-thief');
 const request = require('request');
-const ICO = require('icojs');
+
+const exec = require('child_process').exec;
+const md5 = require('md5');
+const path = require('path');
+const temp = require('temp');
 
 const colorThief = new ColorThief();
 
@@ -47,30 +51,23 @@ function getUrlColors(url) {
       }
 
       if (url.substr(url.length - 4) === '.ico') {
-        resolve([0, 0, 0]);
-        return;
-        console.log('creating buffer');
-        const buffer = new Uint8Array(body).buffer;
-        console.log('buffer created');
+        temp.track();
+        temp.mkdir(md5(url), function(err, dirPath) {
+          const cmd = 'cd ' + dirPath + ';wget ' + url + ';icotool -x -o . favicon.ico;ls -I favicon.ico | head -n 1';
 
-        try {
-          console.log('begging ico parse');
-          ICO.parse(buffer).then(images => {
-            console.log('ico parsed');
-            const imageBuffer = toBuffer(images[0].buffer);
-            const color = colorThief.getColor(imageBuffer);
-            console.log('received ico color data for ' + url);
+          exec(cmd, function(error, stdout, stderr) {
+            // command output is in stdout
+            const color = colorThief.getColor(path.join(dirPath, stdout.trim()));
+            console.log('found ico color ' + color);
             resolve(color);
-          }, (err) => resolve([0, 0, 0]));
-        } catch (err) {
-          console.log('rejecting ico ' + err);
-          resolve([0, 0, 0]);
-        }
+            return;
+          });
+        });
+      } else {
+        resolve([0, 0, 0]);
         return;
       }
 
-      resolve([0, 0, 0]);
-      return;
     });
   });
 }
