@@ -21,7 +21,8 @@ function getUrlColors(url) {
     console.log('requesting content for ' + url);
     request.get({ url: url, encoding: null }, function(err, res, body) {
       if (err) {
-        reject(err);
+        resolve([0, 0, 0]);
+        return;
       }
 
       console.log('received binary color data for ' + url);
@@ -40,7 +41,7 @@ function getUrlColors(url) {
           resolve(color);
         } catch(err) {
           console.log('rejecting png ' + err);
-          reject(err);
+          resolve([0, 0, 0]);
         }
         return;
       }
@@ -58,14 +59,13 @@ function getUrlColors(url) {
             const color = colorThief.getColor(imageBuffer);
             console.log('received ico color data for ' + url);
             resolve(color);
-          });
+          }, (err) => resolve([0, 0, 0]));
         } catch (err) {
           console.log('rejecting ico ' + err);
-          reject(err);
+          resolve([0, 0, 0]);
         }
+        return;
       }
-
-      resolve([0, 0, 0]);
     });
   });
 }
