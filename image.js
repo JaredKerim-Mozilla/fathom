@@ -25,6 +25,26 @@ function getUrlColors(url) {
       }
 
       console.log('received binary color data for ' + url);
+
+      if (url.substr(url.length - 4) === '.svg') {
+        console.log('failing fast for svg for ' + url);
+        resolve([0, 0, 0]);
+        return;
+      }
+
+      if (url.substr(url.length - 4) === '.png') {
+        try {
+          console.log('getting png color data for ' + url);
+          const color = colorThief.getColor(body);
+          console.log('received png color data for ' + url);
+          resolve(color);
+        } catch(err) {
+          console.log('rejecting png ' + err);
+          reject(err);
+        }
+        return;
+      }
+
       if (url.substr(url.length - 4) === '.ico') {
         console.log('creating buffer');
         const buffer = new Uint8Array(body).buffer;
@@ -43,17 +63,8 @@ function getUrlColors(url) {
           console.log('rejecting ico ' + err);
           reject(err);
         }
-      } else {
-        try {
-          console.log('getting png color data for ' + url);
-          const color = colorThief.getColor(body);
-          console.log('received png color data for ' + url);
-          resolve(color);
-        } catch(err) {
-          console.log('rejecting png ' + err);
-          reject(err);
-        }
       }
+
       resolve([0, 0, 0]);
     });
   });
