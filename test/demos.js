@@ -2,7 +2,7 @@ const assert = require('chai').assert;
 const jsdom = require('jsdom');
 
 const {dom, flavor, rule, ruleset} = require('../index');
-const {inlineTextLength, linkDensity} = require('../utils');
+const {inlineTextLength, linkDensity, clusters} = require('../utils');
 
 
 describe('Design-driving demos', function() {
@@ -86,14 +86,16 @@ describe('Design-driving demos', function() {
         );
         const kb = rules.score(doc);
         const paragraphishes = kb.nodesOfFlavor('paragraphish');
+        console.log(paragraphishes[0]);
         assert.equal(paragraphishes[0].score, 5);
         assert.equal(paragraphishes[1].score, 114);
         assert.equal(paragraphishes[3].score, 146);
 
-//         assert.equal(clusters(paragraphishes),
-//                      [[paragraphishes[0],
-//                        paragraphishes[1]],
-//                       [paragraphishes[3]]]);
+        const elements = paragraphishes.map(node => node.element);
+        console.log(elements);
+
+        const elementClusters = clusters(elements, 100);
+        console.log(elementClusters);
         // Then pick the cluster with the highest sum of scores or the cluster around the highest-scoring node or the highest-scoring cluster by some formula (num typed nodes * scores of the nodes), and contiguous() it so things like ads are excluded but short paragraphs are included.
     });
 });
