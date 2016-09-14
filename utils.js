@@ -220,7 +220,7 @@ function distance(elementA, elementB) {
     let bAncestor = elementB;
 
     // Ascend to common parent, stacking them up for later reference:
-    while (!aAncestor.contains(elementB)) {
+    while (!aAncestor.contains(elementB) && aAncestor) {
         aAncestor = aAncestor.parentNode;
         aAncestors.push(aAncestor);
     }
@@ -230,7 +230,7 @@ function distance(elementA, elementB) {
     do {
         bAncestor = bAncestor.parentNode;  // Assumes we've early-returned above if A === B.
         bAncestors.push(bAncestor);
-    } while (bAncestor !== aAncestor);
+    } while ((bAncestor !== aAncestor) && bAncestor);
 
     // Figure out which node is left and which is right, so we can follow
     // sibling links in the appropriate directions when looking for stride
@@ -264,7 +264,7 @@ function distance(elementA, elementB) {
             // Punishment for being at different depths: same as ordinary
             // dissimilarity punishment for now
             cost += DIFFERENT_DEPTH_COST;
-        } else {
+        } else if (l && r) {
             // TODO: Consider similarity of classList.
             cost += l.tagName === r.tagName ? SAME_TAG_COST : DIFFERENT_TAG_COST;
         }
